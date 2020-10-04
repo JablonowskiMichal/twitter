@@ -1,30 +1,40 @@
 package model;
 
-import java.sql.Date;
 
+import org.hibernate.annotations.CreationTimestamp;
+
+import javax.persistence.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
+@Entity
+@Table(name = "app_user")
 public class AppUser {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String login;
-    private String name;
-    private String lastName;
     private String email;
-    private Integer following;
-    private Integer followedBy;
+    private String name;
+    private String password;
+    @Column(name = "last_name")
+    private String lastName;
+    @CreationTimestamp
     private Date registeredSince;
 
-    public AppUser() {
-    }
+    @ManyToMany(mappedBy = "following", cascade = {CascadeType.MERGE,  CascadeType.PERSIST}, fetch = FetchType.EAGER)
+    private Set<AppUser> followers = new HashSet<>();
 
-    public AppUser(Long id, String login, String name, String lastName, String email, Integer following, Integer followedBy, Date registeredSince) {
-        this.id = id;
-        this.login = login;
-        this.name = name;
-        this.lastName = lastName;
-        this.email = email;
-        this.following = following;
-        this.followedBy = followedBy;
-        this.registeredSince = registeredSince;
+    @ManyToMany(cascade = {CascadeType.MERGE,  CascadeType.PERSIST}, fetch = FetchType.EAGER)
+    @JoinTable(name = "follower_followed",
+            joinColumns = {@JoinColumn(name = "follower_fk")},
+            inverseJoinColumns = {@JoinColumn(name = "followed_fk")})
+    private Set<AppUser> following = new HashSet<>();
+
+    public AppUser() {
     }
 
     public Long getId() {
@@ -43,12 +53,28 @@ public class AppUser {
         this.login = login;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getLastName() {
@@ -59,36 +85,101 @@ public class AppUser {
         this.lastName = lastName;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Integer getFollowing() {
-        return following;
-    }
-
-    public void setFollowing(Integer following) {
-        this.following = following;
-    }
-
-    public Integer getFollowedBy() {
-        return followedBy;
-    }
-
-    public void setFollowedBy(Integer followedBy) {
-        this.followedBy = followedBy;
-    }
-
     public Date getRegisteredSince() {
         return registeredSince;
     }
 
     public void setRegisteredSince(Date registeredSince) {
         this.registeredSince = registeredSince;
+    }
+
+    public Set<AppUser> getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(Set<AppUser> followers) {
+        this.followers = followers;
+    }
+
+    public Set<AppUser> getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(Set<AppUser> following) {
+        this.following = following;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AppUser appUser = (AppUser) o;
+        return id.equals(appUser.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "AppUser{" +
+                "id=" + id +
+                ", login='" + login + '\'' +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", registeredSince=" + registeredSince +
+                ", followers=" + followers +
+                ", following=" + following +
+                '}';
+    }
+    public static class UserBuilder {
+        private String name;
+        private String lastName;
+        private String login;
+        private String password;
+        private String email;
+
+        public static UserBuilder getBuilder() {
+            return new UserBuilder();
+        }
+
+        public UserBuilder login(String login) {
+            this.login = login;
+            return this;
+        }
+
+        public UserBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public UserBuilder lastName(String lastName) {
+            this.lastName = lastName;
+            return this;
+        }
+
+        public UserBuilder password(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public UserBuilder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public AppUser build() {
+            AppUser user = new AppUser();
+            user.setLogin(this.login);
+            user.setPassword(this.password);
+            user.setName(this.name);
+            user.setLastName(this.lastName);
+            user.setEmail(this.email);
+            return user;
+        }
     }
 }
 

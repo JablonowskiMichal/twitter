@@ -1,22 +1,27 @@
 package model;
 
-import java.sql.Date;
+import org.hibernate.annotations.CreationTimestamp;
 
+import javax.persistence.*;
+import java.util.Date;
+
+@Entity
+@Table(name = "tweet")
 public class Tweet {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private AppUser author;
-    private String message;
+    @Column(name = "published_at")
+    @CreationTimestamp
     private Date publishedAt;
+    private String message;
+
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinColumn(name = "author_fk")
+    private AppUser author;
 
     public Tweet() {
-    }
-
-    public Tweet(Long id, AppUser author, String message, Date publishedAt) {
-        this.id = id;
-        this.author = author;
-        this.message = message;
-        this.publishedAt = publishedAt;
     }
 
     public Long getId() {
@@ -27,21 +32,6 @@ public class Tweet {
         this.id = id;
     }
 
-    public AppUser getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(AppUser author) {
-        this.author = author;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
 
     public Date getPublishedAt() {
         return publishedAt;
@@ -52,4 +42,22 @@ public class Tweet {
     }
 
 
+    public String getMessage() {
+        return message;
+    }
+
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+
+    public AppUser getAuthor() {
+        return author;
+    }
+
+
+    public void setAuthor(AppUser author) {
+        this.author = author;
+    }
 }
